@@ -1,11 +1,10 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:webrtc_tutorial/signaling.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  // await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -43,8 +42,11 @@ class _MyHomePageState extends State<MyHomePage> {
     _remoteRenderer.initialize();
 
     signaling.onAddRemoteStream = ((stream) {
-      _remoteRenderer.srcObject = stream;
-      setState(() {});
+      print(stream.id);
+      print(stream.getTracks());
+      setState(() {
+        _remoteRenderer.srcObject = stream;
+      });
     });
 
     super.initState();
@@ -78,37 +80,49 @@ class _MyHomePageState extends State<MyHomePage> {
               SizedBox(
                 width: 8,
               ),
+              // ElevatedButton(
+              //   onPressed: () async {
+              //     var offer = await signaling.createOffer(_remoteRenderer);
+              //     textEditingController.text = offer;
+              //     setState(() {});
+              //   },
+              //   child: Text("Create room"),
+              // ),
+              // SizedBox(
+              //   width: 8,
+              // ),
+              // ElevatedButton(
+              //   onPressed: () async {
+              //     // Add roomId
+              //     var str = textEditingController.text;
+
+              //     var json = jsonDecode(str);
+
+              //     var answer = await signaling.createAnswer(
+              //       _remoteRenderer,
+              //       json,
+              //     );
+              //     textEditingController.text = answer;
+              //     setState(() {});
+              //   },
+              //   child: Text("Join room"),
+              // ),
+              // SizedBox(
+              //   width: 8,
+              // ),
               ElevatedButton(
                 onPressed: () async {
-                  roomId = await signaling.createRoom(_remoteRenderer);
-                  textEditingController.text = roomId!;
-                  setState(() {});
+                  await signaling.connect();
                 },
-                child: Text("Create room"),
+                child: Text("Connect with answer"),
               ),
-              SizedBox(
-                width: 8,
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  // Add roomId
-                  signaling.joinRoom(
-                    textEditingController.text,
-                    _remoteRenderer,
-                  );
-                },
-                child: Text("Join room"),
-              ),
-              SizedBox(
-                width: 8,
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  signaling.hangUp(_localRenderer);
-                },
-                child: Text("Hangup"),
-              )
             ],
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              setState(() {});
+            },
+            child: Text("Update"),
           ),
           SizedBox(height: 8),
           Expanded(
