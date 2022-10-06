@@ -3,12 +3,16 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+typedef CloseSocketCallback = void Function(int? code, String? reason);
+typedef OnMessageCallback = void Function(dynamic message);
+typedef OnOpenCalback = void Function();
+
 class WebSocketWorker {
   String _url;
   WebSocket? _socket;
-  VoidCallback? onOpen;
-  ValueChanged? onMessage;
-  Function(int? code, String? reaso)? onClose;
+  OnOpenCalback? onOpen;
+  OnMessageCallback? onMessage;
+  CloseSocketCallback? onClose;
   WebSocketWorker(this._url, {this.onOpen, this.onMessage, this.onClose});
 
   Future<void> connect() async {
@@ -25,14 +29,14 @@ class WebSocketWorker {
     }
   }
 
-  Future<void> send(data) async {
-    if (_socket != null) {
-      _socket?.add(data);
-      print('send: $data');
-    }
+  FutureOr<void> send(data) async {
+    _socket?.add(data);
+
+    debugPrint('WebSocket - send: $data');
   }
 
-  Future<void> close() async {
-    if (_socket != null) _socket?.close();
+  FutureOr<void> close() async {
+    _socket?.close();
+    debugPrint('WebSocket - Socket close');
   }
 }

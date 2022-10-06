@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:webrtc_tutorial/signaling.dart';
+import 'package:webrtc_tutorial/webrtc_controller.dart';
+import 'package:webrtc_tutorial/webrtc_player.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp();
+
   runApp(MyApp());
 }
 
@@ -30,32 +30,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Signaling signaling = Signaling();
-  RTCVideoRenderer _localRenderer = RTCVideoRenderer();
-  RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
-  String? roomId;
-  TextEditingController textEditingController = TextEditingController(text: '');
+  WebrtcController _webrtcController = WebrtcController();
 
   @override
   void initState() {
-    _localRenderer.initialize();
-    _remoteRenderer.initialize();
-
-    signaling.onAddRemoteStream = ((stream) {
-      print(stream.id);
-      print(stream.getTracks());
-      setState(() {
-        _remoteRenderer.srcObject = stream;
-      });
-    });
-
     super.initState();
   }
 
   @override
   void dispose() {
-    _localRenderer.dispose();
-    _remoteRenderer.dispose();
     super.dispose();
   }
 
@@ -72,49 +55,10 @@ class _MyHomePageState extends State<MyHomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
-                onPressed: () {
-                  signaling.openUserMedia(_localRenderer, _remoteRenderer);
-                },
-                child: Text("Open camera & microphone"),
-              ),
-              SizedBox(
-                width: 8,
-              ),
-              // ElevatedButton(
-              //   onPressed: () async {
-              //     var offer = await signaling.createOffer(_remoteRenderer);
-              //     textEditingController.text = offer;
-              //     setState(() {});
-              //   },
-              //   child: Text("Create room"),
-              // ),
-              // SizedBox(
-              //   width: 8,
-              // ),
-              // ElevatedButton(
-              //   onPressed: () async {
-              //     // Add roomId
-              //     var str = textEditingController.text;
-
-              //     var json = jsonDecode(str);
-
-              //     var answer = await signaling.createAnswer(
-              //       _remoteRenderer,
-              //       json,
-              //     );
-              //     textEditingController.text = answer;
-              //     setState(() {});
-              //   },
-              //   child: Text("Join room"),
-              // ),
-              // SizedBox(
-              //   width: 8,
-              // ),
-              ElevatedButton(
                 onPressed: () async {
-                  await signaling.connect();
+                  _webrtcController.connect?.call();
                 },
-                child: Text("Connect with answer"),
+                child: Text("Connect"),
               ),
             ],
           ),
@@ -131,24 +75,13 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(child: RTCVideoView(_localRenderer, mirror: true)),
-                  Expanded(child: RTCVideoView(_remoteRenderer)),
+                  Expanded(
+                      child: WebrtcPlayer(
+                    url: 'ws://51.250.98.53:3333/app/stream?transport=tcp',
+                    controller: _webrtcController,
+                  )),
                 ],
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Join the following Room: "),
-                Flexible(
-                  child: TextFormField(
-                    controller: textEditingController,
-                  ),
-                )
-              ],
             ),
           ),
           SizedBox(height: 8)
